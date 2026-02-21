@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uday | Visual Storyteller</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+/* ---------- GLOBAL ---------- */
+body{
+margin:0;
+font-family:'Space Grotesk',sans-serif;
+background:linear-gradient(160deg,#050505,#111,#050505);
+color:white;
+overflow-x:hidden;
+}
+
+/* Grain */
+body::after{
+content:"";
+position:fixed;
+inset:0;
+background:url("https://grainy-gradients.vercel.app/noise.svg");
+opacity:.06;
+pointer-events:none;
+}
+
+/* Transition overlay */
+.transition{
+position:fixed;
+inset:0;
+background:black;
+z-index:9998;
+}
+
+/* Preloader */
+.preloader{
+position:fixed;
+inset:0;
+background:black;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+.hello{font-size:clamp(30px,5vw,60px);}
+
+/* Cursor */
+.cursor{
+position:fixed;
+width:10px;
+height:10px;
+background:white;
+border-radius:50%;
+pointer-events:none;
+z-index:1000;
+}
+
+/* Hero */
+.hero{
+min-height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+padding:8vw;
+}
+
+.line{overflow:hidden;}
+
+.line span{
+display:inline-block;
+font-size:clamp(36px,6vw,90px);
+font-weight:600;
+}
+
+.hero p{
+max-width:600px;
+color:#aaa;
+margin-top:30px;
+}
+
+/* Sections */
+section{
+min-height:80vh;
+padding:10vw 8vw;
+}
+
+h2{
+font-size:clamp(28px,4vw,50px);
+margin-bottom:20px;
+}
+
+/* Services */
+.service{margin-bottom:40px;}
+
+/* Contact form */
+form{
+max-width:500px;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+input,textarea{
+background:#111;
+border:1px solid #333;
+padding:12px;
+color:white;
+font-family:inherit;
+}
+
+button{
+background:white;
+color:black;
+border:none;
+padding:12px;
+cursor:pointer;
+font-weight:bold;
+}
+
+/* MOBILE POLISH */
+@media(max-width:768px){
+.hero{padding:12vw 6vw;}
+section{padding:14vw 6vw;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="transition"></div>
+<div class="preloader"><div class="hello"></div></div>
+<div class="cursor"></div>
+
+<section class="hero">
+<h1>
+<div class="line"><span>Visual Storyteller</span></div>
+<div class="line"><span>Editor • Photographer</span></div>
+<div class="line"><span>Videographer</span></div>
+</h1>
+
+<p>
+Helping creators and brands produce cinematic,
+high-impact content that looks premium.
+</p>
+</section>
+
+<section>
+<h2>Services</h2>
+
+<div class="service">
+<h3>Video Editing</h3>
+<p>Cinematic edits, reels, brand storytelling.</p>
+</div>
+
+<div class="service">
+<h3>Photography</h3>
+<p>Color grading, retouching, visual identity.</p>
+</div>
+
+<div class="service">
+<h3>Creative Direction</h3>
+<p>Helping brands present professionally.</p>
+</div>
+</section>
+
+<section>
+<h2>Contact Me</h2>
+
+<form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+<input type="text" name="name" placeholder="Your Name" required>
+<input type="email" name="email" placeholder="Email" required>
+<textarea name="message" rows="5" placeholder="Your Project..." required></textarea>
+<button type="submit">Send Message</button>
+</form>
+
+</section>
+
+<script>
+/* CURSOR */
+const cursor=document.querySelector(".cursor");
+window.addEventListener("mousemove",e=>{
+gsap.to(cursor,{x:e.clientX-5,y:e.clientY-5,duration:.15});
+});
+
+/* PRELOADER + HERO */
+const hellos=["Hello","Hola","Bonjour","Ciao","नमस्ते","こんにちは"];
+const hello=document.querySelector(".hello");
+const preloader=document.querySelector(".preloader");
+
+document.querySelectorAll(".line span").forEach(el=>{
+const t=el.textContent;
+el.innerHTML=t.split("").map(c=>`<span class="char">${c}</span>`).join("");
+});
+
+gsap.set(".char",{y:120,opacity:0});
+
+const tl=gsap.timeline();
+
+hellos.forEach(t=>{
+tl.to(hello,{opacity:1,duration:.5,onStart:()=>hello.textContent=t})
+.to(hello,{opacity:0,duration:.4},"+=.4");
+});
+
+tl.to(preloader,{yPercent:-100,duration:1})
+.to(".transition",{yPercent:-100,duration:1},"<")
+.to(".char",{y:0,opacity:1,stagger:.02,duration:1},"-=0.5");
+
+/* SECTION SCROLL ANIMATIONS */
+gsap.utils.toArray("section").forEach(sec=>{
+gsap.from(sec,{
+opacity:0,
+y:80,
+duration:1,
+scrollTrigger:{
+trigger:sec,
+start:"top 85%"
+}
+});
+});
+</script>
+
+</body>
+</html>
