@@ -1,228 +1,381 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uday | Visual Storyteller</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harshcam | Visual Storyteller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --bg: #050505;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border: #222;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+        * { box-sizing: border-box; }
 
-<style>
-/* ---------- GLOBAL ---------- */
-body{
-margin:0;
-font-family:'Space Grotesk',sans-serif;
-background:linear-gradient(160deg,#050505,#111,#050505);
-color:white;
-overflow-x:hidden;
-}
+        body {
+            margin: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
 
-/* Grain */
-body::after{
-content:"";
-position:fixed;
-inset:0;
-background:url("https://grainy-gradients.vercel.app/noise.svg");
-opacity:.06;
-pointer-events:none;
-}
+        /* Grain Overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 9000;
+        }
 
-/* Transition overlay */
-.transition{
-position:fixed;
-inset:0;
-background:black;
-z-index:9998;
-}
+        /* Background Gradient Blob */
+        .gradient-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 15% 50%, rgba(40, 40, 40, 0.4), transparent 25%),
+                        radial-gradient(circle at 85% 30%, rgba(30, 30, 60, 0.4), transparent 25%);
+            filter: blur(80px);
+            opacity: 0.6;
+        }
 
-/* Preloader */
-.preloader{
-position:fixed;
-inset:0;
-background:black;
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:9999;
-}
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 25px 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            mix-blend-mode: difference;
+        }
+        .logo { font-weight: 600; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-links a {
+            color: white; text-decoration: none; margin-left: 30px;
+            font-size: 0.9rem; opacity: 0.7; transition: opacity 0.3s;
+        }
+        .nav-links a:hover { opacity: 1; }
 
-.hello{font-size:clamp(30px,5vw,60px);}
+        /* Cursor */
+        .cursor {
+            position: fixed; width: 12px; height: 12px;
+            background: white; border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            mix-blend-mode: difference;
+        }
 
-/* Cursor */
-.cursor{
-position:fixed;
-width:10px;
-height:10px;
-background:white;
-border-radius:50%;
-pointer-events:none;
-z-index:1000;
-}
+        /* Preloader */
+        .preloader {
+            position: fixed; inset: 0; background: #000;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000;
+        }
+        .hello { font-size: clamp(40px, 8vw, 80px); font-weight: 300; }
 
-/* Hero */
-.hero{
-min-height:100vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-padding:8vw;
-}
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 0 8vw;
+        }
+        .line { overflow: hidden; line-height: 1; margin-bottom: -1vw; }
+        .line span {
+            display: inline-block;
+            font-size: clamp(50px, 9vw, 120px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+        }
+        .hero-sub {
+            margin-top: 40px; max-width: 500px;
+            color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;
+            opacity: 0; transform: translateY(20px);
+        }
 
-.line{overflow:hidden;}
+        /* Sections Global */
+        section { padding: 120px 8vw; }
+        h2 {
+            font-size: clamp(30px, 4vw, 40px);
+            margin-bottom: 60px; font-weight: 400;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px; display: inline-block;
+        }
 
-.line span{
-display:inline-block;
-font-size:clamp(36px,6vw,90px);
-font-weight:600;
-}
+        /* Work Grid */
+        .work-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        .work-grid a { text-decoration: none; color: inherit; display: block; }
+        .work-item {
+            aspect-ratio: 16/9; background: #111; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; cursor: pointer;
+        }
+        .work-item:hover .placeholder-bg { transform: scale(1.05); opacity: 0.8; }
+        .placeholder-bg {
+            width: 100%; height: 100%;
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+            transition: transform 0.6s ease, opacity 0.6s;
+            opacity: 0.5;
+        }
+        .work-info { position: absolute; bottom: 20px; left: 20px; z-index: 2; }
 
-.hero p{
-max-width:600px;
-color:#aaa;
-margin-top:30px;
-}
+        /* About Section */
+        .about-container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .about-text { font-size: 1.1rem; line-height: 1.8; color: var(--text-muted); }
+        .about-img { width: 100%; height: 400px; object-fit: cover; filter: grayscale(100%); transition: filter 0.5s; }
+        .about-img:hover { filter: grayscale(0%); }
 
-/* Sections */
-section{
-min-height:80vh;
-padding:10vw 8vw;
-}
+        /* Services Grid */
+        .services-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .service-card {
+            border: 1px solid var(--border); padding: 40px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .service-card:hover { background: #111; border-color: #444; }
+        .service-card h3 { margin-top: 0; font-size: 1.5rem; }
+        .service-card p { color: var(--text-muted); line-height: 1.5; }
 
-h2{
-font-size:clamp(28px,4vw,50px);
-margin-bottom:20px;
-}
+        /* Process Section */
+        .process-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-top: 40px; }
+        .process-step { border-top: 1px solid #333; padding-top: 20px; }
+        .step-num { font-size: 3rem; font-weight: 600; color: #222; margin-bottom: 15px; display: block; }
+        .process-step h3 { margin: 0 0 10px 0; font-size: 1.3rem; }
+        .process-step p { color: var(--text-muted); line-height: 1.5; }
 
-/* Services */
-.service{margin-bottom:40px;}
+        /* Contact */
+        .contact-container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+        form { display: flex; flex-direction: column; gap: 20px; }
+        input, textarea {
+            background: transparent; border: none;
+            border-bottom: 1px solid #333; padding: 15px 0;
+            color: white; font-family: inherit; font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus { outline: none; border-bottom-color: white; }
+        button {
+            margin-top: 20px; background: white; color: black;
+            border: none; padding: 15px 40px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            align-self: flex-start; transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
 
-/* Contact form */
-form{
-max-width:500px;
-display:flex;
-flex-direction:column;
-gap:15px;
-}
+        /* Footer */
+        footer { border-top: 1px solid #222; padding: 80px 8vw 40px; display: flex; flex-direction: column; gap: 40px; }
+        .footer-content { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; }
+        .socials a { color: white; text-decoration: none; margin-right: 30px; font-size: 1.2rem; position: relative; }
+        .socials a::after { content: ''; position: absolute; width: 0; height: 1px; bottom: -5px; left: 0; background: white; transition: width 0.3s; }
+        .socials a:hover::after { width: 100%; }
+        .copyright { color: #444; font-size: 0.9rem; }
 
-input,textarea{
-background:#111;
-border:1px solid #333;
-padding:12px;
-color:white;
-font-family:inherit;
-}
-
-button{
-background:white;
-color:black;
-border:none;
-padding:12px;
-cursor:pointer;
-font-weight:bold;
-}
-
-/* MOBILE POLISH */
-@media(max-width:768px){
-.hero{padding:12vw 6vw;}
-section{padding:14vw 6vw;}
-}
-</style>
+        @media(max-width: 768px) {
+            .contact-container { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .about-container { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="transition"></div>
-<div class="preloader"><div class="hello"></div></div>
-<div class="cursor"></div>
+    <div class="gradient-bg"></div>
 
-<section class="hero">
-<h1>
-<div class="line"><span>Visual Storyteller</span></div>
-<div class="line"><span>Editor • Photographer</span></div>
-<div class="line"><span>Videographer</span></div>
-</h1>
+    <div class="preloader"><div class="hello"></div></div>
+    <div class="cursor"></div>
 
-<p>
-Helping creators and brands produce cinematic,
-high-impact content that looks premium.
-</p>
-</section>
+    <nav>
+        <div class="logo">Harshcam.</div>
+        <div class="nav-links">
+            <a href="#work">Work</a>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
 
-<section>
-<h2>Services</h2>
+    <section class="hero">
+        <h1>
+            <div class="line"><span>Visual</span></div>
+            <div class="line"><span>Storyteller</span></div>
+        </h1>
+        <p class="hero-sub">
+            Editor • Photographer • Videographer<br>
+            Crafting cinematic narratives for brands and creators.
+        </p>
+    </section>
 
-<div class="service">
-<h3>Video Editing</h3>
-<p>Cinematic edits, reels, brand storytelling.</p>
-</div>
+    <section id="about">
+        <div class="about-container">
+            <img src="Screenshot_20260223_194215689.jpg" alt="Profile" class="about-img">
+            <div>
+                <h2>Behind the Lens</h2>
+                <p class="about-text">I am Harshcam, a visual storyteller obsessed with the details. I don't just edit videos; I craft rhythms and emotions. Whether it's a high-energy commercial or a slow-burn documentary, I bring a cinematic eye to every frame. My goal is to make your content not just seen, but felt.</p>
+                <p class="about-text">Based in Bhopal, India, working globally.</p>
+            </div>
+        </div>
+    </section>
 
-<div class="service">
-<h3>Photography</h3>
-<p>Color grading, retouching, visual identity.</p>
-</div>
+    <section id="work">
+        <h2>Selected Works</h2>
+        <div class="work-grid">
+            <a href="https://www.instagram.com/udaychaturvedi06/" target="_blank" class="work-item">
+                <div class="placeholder-bg" style="background: url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;"></div>
+                <div class="work-info"><h3>Cinematic Reel</h3></div>
+            </a>
+            <a href="https://www.instagram.com/udaychaturvedi06/" target="_blank" class="work-item">
+                <div class="placeholder-bg" style="background: url('https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;"></div>
+                <div class="work-info"><h3>Music Video Edit</h3></div>
+            </a>
+            <a href="https://www.instagram.com/udaychaturvedi06/" target="_blank" class="work-item">
+                <div class="placeholder-bg" style="background: url('https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;"></div>
+                <div class="work-info"><h3>Fashion Promo</h3></div>
+            </a>
+            <a href="https://www.instagram.com/udaychaturvedi06/" target="_blank" class="work-item">
+                <div class="placeholder-bg" style="background: url('https://images.unsplash.com/photo-1533577116850-9cc66cad8a9b?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;"></div>
+                <div class="work-info"><h3>Travel Documentary</h3></div>
+            </a>
+            <a href="https://www.instagram.com/udaychaturvedi06/" target="_blank" class="work-item">
+                <div class="placeholder-bg" style="background: url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;"></div>
+                <div class="work-info"><h3>Product Commercial</h3></div>
+            </a>
+            <a href="https://www.instagram.com/udaychaturvedi06/" target="_blank" class="work-item">
+                <div class="placeholder-bg" style="background: url('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;"></div>
+                <div class="work-info"><h3>Social Media Content</h3></div>
+            </a>
+        </div>
+    </section>
 
-<div class="service">
-<h3>Creative Direction</h3>
-<p>Helping brands present professionally.</p>
-</div>
-</section>
+    <section id="services">
+        <h2>Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Video Editing</h3>
+                <p>High-end post-production, color grading, and sound design.</p>
+            </div>
+            <div class="service-card">
+                <h3>Photography</h3>
+                <p>Editorial, portrait, and product photography with a cinematic look.</p>
+            </div>
+            <div class="service-card">
+                <h3>Direction</h3>
+                <p>Creative direction to help brands define their visual identity.</p>
+            </div>
+        </div>
+    </section>
 
-<section>
-<h2>Contact Me</h2>
+    <section id="process">
+        <h2>The Process</h2>
+        <div class="process-grid">
+            <div class="process-step">
+                <span class="step-num">01</span>
+                <h3>Discovery</h3>
+                <p>Understanding your vision, audience, and goals to set the creative direction.</p>
+            </div>
+            <div class="process-step">
+                <span class="step-num">02</span>
+                <h3>Production</h3>
+                <p>Capturing high-fidelity footage with a focus on lighting and composition.</p>
+            </div>
+            <div class="process-step">
+                <span class="step-num">03</span>
+                <h3>Post-Production</h3>
+                <p>Editing, color grading, and sound design to bring the story to life.</p>
+            </div>
+            <div class="process-step">
+                <span class="step-num">04</span>
+                <h3>Delivery</h3>
+                <p>Final polish and formatting for all platforms to ensure maximum impact.</p>
+            </div>
+        </div>
+    </section>
 
-<form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-<input type="text" name="name" placeholder="Your Name" required>
-<input type="email" name="email" placeholder="Email" required>
-<textarea name="message" rows="5" placeholder="Your Project..." required></textarea>
-<button type="submit">Send Message</button>
-</form>
+    <section id="contact">
+        <h2>Let's Create</h2>
+        <div class="contact-container">
+            <div>
+                <p style="color:#888; font-size:1.2rem; margin-top:0;">
+                    Have a project in mind? <br>Drop me a line.
+                </p>
+            </div>
+            <form action="https://formsubmit.co/udaychaturvedi06@gmail.com" method="POST">
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <textarea name="message" rows="4" placeholder="Tell me about your project" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </section>
 
-</section>
+    <footer>
+        <div class="footer-content">
+            <div class="logo">Harshcam.</div>
+            <div class="socials">
+                <a href="#">Instagram</a>
+                <a href="#">LinkedIn</a>
+                <a href="#">Twitter</a>
+            </div>
+        </div>
+        <div class="copyright">© 2024 Harshcam. All rights reserved.</div>
+    </footer>
 
-<script>
-/* CURSOR */
-const cursor=document.querySelector(".cursor");
-window.addEventListener("mousemove",e=>{
-gsap.to(cursor,{x:e.clientX-5,y:e.clientY-5,duration:.15});
-});
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
 
-/* PRELOADER + HERO */
-const hellos=["Hello","Hola","Bonjour","Ciao","नमस्ते","こんにちは"];
-const hello=document.querySelector(".hello");
-const preloader=document.querySelector(".preloader");
+        /* CURSOR */
+        const cursor = document.querySelector(".cursor");
+        window.addEventListener("mousemove", e => {
+            gsap.to(cursor, { x: e.clientX - 6, y: e.clientY - 6, duration: 0.1 });
+        });
 
-document.querySelectorAll(".line span").forEach(el=>{
-const t=el.textContent;
-el.innerHTML=t.split("").map(c=>`<span class="char">${c}</span>`).join("");
-});
+        /* PRELOADER & HERO */
+        const hellos = ["Hello", "Hola", "Bonjour", "Ciao", "नमस्ते", "こんにちは"];
+        const hello = document.querySelector(".hello");
+        const preloader = document.querySelector(".preloader");
 
-gsap.set(".char",{y:120,opacity:0});
+        document.querySelectorAll(".line span").forEach(el => {
+            const t = el.textContent;
+            el.innerHTML = t.split("").map(c => `<span class="char">${c}</span>`).join("");
+        });
+        gsap.set(".char", { y: 150 });
 
-const tl=gsap.timeline();
+        const tl = gsap.timeline();
 
-hellos.forEach(t=>{
-tl.to(hello,{opacity:1,duration:.5,onStart:()=>hello.textContent=t})
-.to(hello,{opacity:0,duration:.4},"+=.4");
-});
+        hellos.forEach(t => {
+            tl.to(hello, { opacity: 1, duration: 0.2, onStart: () => hello.textContent = t })
+              .to(hello, { opacity: 0, duration: 0.2 }, "+=0.15");
+        });
 
-tl.to(preloader,{yPercent:-100,duration:1})
-.to(".transition",{yPercent:-100,duration:1},"<")
-.to(".char",{y:0,opacity:1,stagger:.02,duration:1},"-=0.5");
+        tl.to(preloader, { yPercent: -100, duration: 1, ease: "power4.inOut" })
+          .to(".char", { y: 0, stagger: 0.03, duration: 1, ease: "power4.out" }, "-=0.5")
+          .to(".hero-sub", { opacity: 1, y: 0, duration: 1 }, "-=0.8");
 
-/* SECTION SCROLL ANIMATIONS */
-gsap.utils.toArray("section").forEach(sec=>{
-gsap.from(sec,{
-opacity:0,
-y:80,
-duration:1,
-scrollTrigger:{
-trigger:sec,
-start:"top 85%"
-}
-});
-});
-</script>
+        /* SCROLL ANIMATIONS */
+        gsap.utils.toArray("section").forEach(sec => {
+            gsap.from(sec, {
+                opacity: 0, y: 50, duration: 1,
+                scrollTrigger: { trigger: sec, start: "top 80%" }
+            });
+        });
 
+        gsap.from(".service-card", {
+            y: 50, opacity: 0, duration: 0.8, stagger: 0.2,
+            scrollTrigger: { trigger: "#services", start: "top 70%" }
+        });
+    </script>
 </body>
 </html>
+```
+
+<!--
+[PROMPT_SUGGESTION]How can I replace the placeholder colors in the Work section with actual images?[/PROMPT_SUGGESTION]
+[PROMPT_SUGGESTION]Can you help me connect the contact form to my email address?[/PROMPT_SUGGESTION]
